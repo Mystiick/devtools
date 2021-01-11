@@ -3,6 +3,7 @@ FOR /f "tokens=3" %%G IN ('git status ^|find "On branch"') DO set branch=%%G
 
 :: If we are on the master branch, verify we want to commit and push directly to it
 if %branch%==master goto :verify
+if %branch%==main goto :verify
 goto :commit
 
 :verify
