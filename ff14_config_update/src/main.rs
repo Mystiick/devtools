@@ -19,41 +19,51 @@ impl Default for Config {
 
 fn main() {
     // Load config
-    let mut cfg: Config = confy::load_path("./app_config.toml").expect("Failed load load config");
+    let cfg: Config = load_and_validate_config();
+
+    let selection = get_selection();
     
+    println!("You chose {}", selection);
+}
+
+fn validate_config_field(field: &String, file_name: String) -> String {    
+    let mut output = field.to_string();
+
+    while !Path::new(&output).is_file() {
+        println!("Enter the path to your {} file.", file_name); 
+        
+        io::stdin().read_line(&mut output).expect("Failed to read a line");
+        output = output.trim().to_string();
+    };
+
+    return output;
+}
+
+fn load_and_validate_config() -> Config {
+    let cfg = match confy::load_path("./app_config.toml") {
+        Ok(val) => val,
+        Err(msg) => {
+            println!("\r\nMalformed configuration file with the error:");
+            println!("\t{}\r\n", msg);
+            println!("Creating a new file! Backup your old file now if you don't want to lose any changes.\r\n");
+            Config::default()
+        }
+    };
+
     // Check if config is valid
     // Validate config_path. If it is not valid, ask for one until there is a valid response
-    while !Path::new(&cfg.config_path).is_file() {
-        println!("Invalid path: {}", &cfg.config_path);
-        println!("Enter the path to your FFXIV.cfg file. (My Documents/My Games on Windows)"); 
-        
-        let mut file_path = String::new();
-        io::stdin().read_line(&mut file_path).expect("Failed to read a line");
+    let new_config = validate_config_field(&cfg.config_path, "FFXIV.cfg".to_string());
+    let new_exe = validate_config_field(&cfg.exe_path, "ffxivboot.exe".to_string());
 
-        cfg = Config {
-            config_path: file_path.trim().to_string(),
-            ..cfg
-        };
-        
+    if new_config != cfg.config_path || new_exe != cfg.exe_path {
+        let cfg = Config { config_path: new_config, exe_path: new_exe };
         confy::store_path("./app_config.toml", &cfg).expect("Failed to save config");
-    };
+    }
 
-    // Validate config_path. If it is not valid, ask for one until there is a valid response
-    while !Path::new(&cfg.exe_path).is_file() {
-        println!("Invalid path: {}", &cfg.exe_path);
-        println!("Enter the path to your ffxivboot.exe file. (In your install directory)"); 
-        
-        let mut file_path = String::new();
-        io::stdin().read_line(&mut file_path).expect("Failed to read a line");
+    return cfg;
+}
 
-        cfg = Config {
-            exe_path: file_path.trim().to_string(),
-            ..cfg
-        };
-        
-        confy::store_path("./app_config.toml", &cfg).expect("Failed to save config");
-    };
-
+fn get_selection() -> i16 {
     let mut selection: i16 = -1;
     let mut input = String::new();
 
@@ -72,6 +82,5 @@ fn main() {
         
     }
 
-    println!("You chose {}", selection);
+    return selection;
 }
-
