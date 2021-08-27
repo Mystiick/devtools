@@ -1,10 +1,12 @@
 use confy;
 use serde::{Serialize, Deserialize};
 
-use std::fs::File;
+use std::fs::OpenOptions;
 use std::io;
+use std::io::Error;
 use std::io::prelude::*;
 use std::path::Path;
+use std::process::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
@@ -20,15 +22,20 @@ impl Default for Config {
     }
 }
 
-fn main() {
-    let cfg: Config = load_and_validate_config();
-    let selection = get_selection();
+fn main() -> Result<(), Error> {
+    let cfg: Config = load_and_validate_config()?;
+    let selection = get_selection()?;
 
-    update_file(&cfg, selection);
-    launch_game(&cfg);
+    if selection >= 0 {
+        update_file(&cfg, selection)?;
+    }
+
+    Command::new(&cfg.exe_path).spawn()?;
+
+    Ok(())
 }
 
-fn load_and_validate_config() -> Config {
+fn load_and_validate_config() -> Result<Config, Error> {
     let cfg = match confy::load_path("./app_config.toml") {
         Ok(val) => val,
         Err(msg) => {
@@ -41,31 +48,31 @@ fn load_and_validate_config() -> Config {
 
     // Check if config is valid
     // Validate config_path. If it is not valid, ask for one until there is a valid response
-    let new_config = validate_config_field(&cfg.config_path, "FFXIV.cfg".to_string());
-    let new_exe = validate_config_field(&cfg.exe_path, "ffxivboot.exe".to_string());
+    let new_config = validate_config_field(&cfg.config_path, "FFXIV.cfg".to_string())?;
+    let new_exe = validate_config_field(&cfg.exe_path, "ffxivboot.exe".to_string())?;
 
     if new_config != cfg.config_path || new_exe != cfg.exe_path {
         let cfg = Config { config_path: new_config, exe_path: new_exe };
         confy::store_path("./app_config.toml", &cfg).expect("Failed to save config");
     }
 
-    return cfg;
+    return Ok(cfg);
 }
 
-fn validate_config_field(field: &String, file_name: String) -> String {
+fn validate_config_field(field: &String, file_name: String) -> Result<String, Error> {
     let mut output = field.to_string();
 
     while !Path::new(&output).is_file() {
         println!("Enter the path to your {} file.", file_name); 
         
-        io::stdin().read_line(&mut output).expect("Failed to read a line");
+        io::stdin().read_line(&mut output)?;
         output = output.trim().to_string();
     };
 
-    return output;
+    return Ok(output);
 }
 
-fn get_selection() -> i16 {
+fn get_selection() -> Result<i16, Error> {
     let mut selection: i16 = -1;
     let mut input = String::new();
 
@@ -75,7 +82,12 @@ fn get_selection() -> i16 {
         println!("2) Windowed - Left Window");
     
         println!("Enter a choice:");
-        io::stdin().read_line(&mut input).expect("Failed to read input");
+        io::stdin().read_line(&mut input)?;
+
+        if input.trim().is_empty() {
+            println!("Launching with prior settings.");
+            return Ok(-1);
+        }
 
         selection = match input.trim().parse() {
             Ok(val) => val,
@@ -83,11 +95,10 @@ fn get_selection() -> i16 {
         };
     }
 
-    return selection;
+    return Ok(selection);
 }
 
-// TODO: Should probably return Result?
-fn update_file(cfg: &Config, selection: i16) {
+fn update_file(cfg: &Config, selection: i16) -> Result<(), Error> {
 
     println!("You chose {}", selection);
 
@@ -108,10 +119,10 @@ fn update_file(cfg: &Config, selection: i16) {
     // Read the file
     let path = Path::new(&cfg.config_path);
 
-    let mut file = match File::open(&path) {
-        Ok(val) => val,
-        Err(msg) => panic!("Failed to open file {}. {}.", path.display(), msg)
-    };
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(path)?;
 
     let mut file_text = String::new();
     match file.read_to_string(&mut file_text) {
@@ -133,11 +144,10 @@ fn update_file(cfg: &Config, selection: i16) {
     }
 
     // Save the new file
-    // TODO: Better error handling
-    match file.write_all(new_file_text.as_bytes()) {
-        Ok(_) => return,
-        Err(msg) => panic!("{}", msg)
-    }
+    file.seek(std::io::SeekFrom::Start(0))?;
+    file.write_all(new_file_text.as_bytes())?;
+
+    Ok(())
 }
 
 fn update_line(line: &str, new_val: &str) -> String {
@@ -145,8 +155,4 @@ fn update_line(line: &str, new_val: &str) -> String {
     let val = split[1];
     
     return line.replace(&val, new_val);
-}
-
-fn launch_game(cfg: &Config) {
-    println!("{}", cfg.exe_path);
 }
