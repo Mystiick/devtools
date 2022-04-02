@@ -37,7 +37,7 @@ impl AppConfig {
     }
 }
 
-pub fn validate_config(cfg: AppConfig) -> Result<AppConfig, Error> {
+fn validate_config(cfg: AppConfig) -> Result<AppConfig, Error> {
     // Check if config is valid
     // Validate config_path. If it is not valid, ask for one until there is a valid response
     let new_config = validate_config_field(&cfg.config_path, "FFXIV.cfg".to_string())?;
