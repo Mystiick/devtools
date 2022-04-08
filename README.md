@@ -11,3 +11,6 @@ Console app to mute/unmute connected microphones.
 
 ## ffxiv_config_update
 Console app that updates the configuration for Final Fantasy 14 to determine which monitor and windowed status it should open with.
+
+## SaveBackup
+Console app to backup files from one directory to another optionally git controlled folder
