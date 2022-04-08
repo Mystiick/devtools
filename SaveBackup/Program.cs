@@ -14,7 +14,7 @@ public class Program
         foreach (string fileName in Directory.GetFiles(appConfig.SaveLocation))
         {
             FileInfo fi = new FileInfo(fileName);
-            File.Copy(fileName, appConfig.BackupLocation + fi.Name, true);
+            File.Copy(fileName, Path.Combine(appConfig.BackupLocation, fi.Name), true);
         }
 
         // If we are using Git, commit and push the latest files
