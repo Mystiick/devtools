@@ -1,21 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-public class Shard { public int Amount { get; set; } = -1; public int Summons { get; set; } = -1; }
-public class Preset { public string Name { get; set; } = ""; public Shard[] Probabilities { get; set; } = new Shard[0]; }
-
 class Program
 {
-    private static Shard[] Probability = {
-        new Shard() { Amount = 1, Summons = 6 },
-        new Shard() { Amount = 2, Summons = 16 },
-        new Shard() { Amount = 5, Summons = 65 },
-    };
-
-    private static Preset[] Presets = new[] {
-         new Preset() { Name = "ssr", Probabilities = Probability } ,
-         new Preset() { Name = "ssr+", Probabilities = Probability } ,
-    };
-
     public static void Main(string[] args)
     {
         // Load config from appsettings
@@ -29,20 +15,19 @@ class Program
         var config = builder.Build();
         presets = config.GetSection("Presets").Get<Preset[]>();
 
-        Preset p = ChoosePreset(presets);
-        int req = GetRequiredShards();
+        Preset preset = ChoosePreset(presets);
+        int required = GetRequiredShards();
 
         for (int i = 1; true; i++)
         {
-            var totals = p.Probabilities.Select(x => new { Probability = x, Summoned = i / x.Summons * x.Amount });
-
-            if (totals.Sum(x => x.Summoned) >= req)
+            var total = preset.Probabilities.Sum(x => x.SimulateDrops(i));
+            if (total >= required)
             {
-                Console.WriteLine($"A total of {i} summons are required, with {totals.Sum(x => x.Summoned) - req} remaining");
+                Console.WriteLine($"A total of {i} summons are required, with {total - required} remaining");
 
-                foreach (var t in totals)
+                foreach (var prob in preset.Probabilities)
                 {
-                    Console.WriteLine($"\t{t.Probability.Amount}:\t{t.Summoned}");
+                    Console.WriteLine($"\t{prob.Amount}:\t{prob.SimulateDrops(i)}");
                 }
 
                 break;
@@ -71,16 +56,16 @@ class Program
 
     private static int GetRequiredShards()
     {
-        int temp = 0;
+        int output = 0;
 
-        while (temp == 0)
+        while (output == 0)
         {
             Console.WriteLine("How many total shards do you need:");
 
             var input = Console.ReadLine();
-            int.TryParse(input, out temp);
+            int.TryParse(input, out output);
         }
 
-        return temp;
+        return output;
     }
 }
