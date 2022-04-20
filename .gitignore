@@ -3,3 +3,6 @@
 **/target
 
 ff14_config_update/app_config.toml
+
+**/.vscode/
+**/appsettings.dev.json
