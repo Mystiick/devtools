@@ -15,23 +15,23 @@ class Program
         var config = builder.Build();
         presets = config.GetSection("Presets").Get<Preset[]>();
 
+        DoWork(presets);
+    }
+
+    private static void DoWork(Preset[] presets)
+    {
+        // Get user input
         Preset preset = ChoosePreset(presets);
         int required = GetRequiredShards();
 
-        for (int i = 1; true; i++)
+        // Quick Maths
+        Result r = preset.CalculateRequiredDrops(required);
+
+        // Print results
+        Console.WriteLine($"A total of {r.TotalRequired} summons are required, with {r.Remainder} remaining");
+        foreach (Tuple<Drop, int> b in r.Breakdown.OrderBy(x => x.Item1.AmountDropped))
         {
-            var total = preset.Probabilities.Sum(x => x.SimulateDrops(i));
-            if (total >= required)
-            {
-                Console.WriteLine($"A total of {i} summons are required, with {total - required} remaining");
-
-                foreach (var prob in preset.Probabilities)
-                {
-                    Console.WriteLine($"\t{prob.Amount}:\t{prob.SimulateDrops(i)}");
-                }
-
-                break;
-            }
+            Console.WriteLine($"\t{b.Item1.AmountDropped}:\t{b.Item2}");
         }
     }
 
