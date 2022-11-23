@@ -1,6 +1,6 @@
 javascript: (() => {
-    var class_beside = "iYwoNw";
-    var class_below = "frGCmB";
+    var class_beside = "fqTSIB";
+    var class_below = "dhPeII";
 
     /* Open theatre mode */
     var t = document.querySelector('[aria-label="Theatre Mode (alt+t)"]');
@@ -22,4 +22,8 @@ javascript: (() => {
     c.style["position"] = "absolute";
     c.style["left"] = "0";
     c.style["bottom"] = "0";
+
+    /* Remove the top gifter/bits */
+    document.getElementsByClassName("channel-leaderboard-marquee")[0].style = "display:none";
+    document.getElementsByClassName("stream-chat-header")[0].style = "display:none";
 })();
