@@ -25,5 +25,5 @@ javascript: (() => {
 
     /* Remove the top gifter/bits */
     document.getElementsByClassName("channel-leaderboard-marquee")[0].style = "display:none";
-    document.getElementsByClassName("stream-chat-header")[0].style = "display:none";
+    document.getElementsByClassName("stream-chat-header")[0].style = "display:none !important";
 })();
