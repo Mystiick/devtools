@@ -1,12 +1,20 @@
 javascript: (() => {
-    var class_beside = "fqTSIB";
-    var class_below = "dhPeII";
+    /* className: class of the object to hide | elementFinder: function to fetch the single element to hide */
+    function hide(className, elementFinder) {
+        try {
+            elementFinder(document.getElementsByClassName(className)).style = "display:none !important"
+        }
+        catch { }
+    }
+
+    var class_beside = "fqTSIB"; /* class twitch assigns the chatbox for the right side */
+    var class_below = "dhPeII"; /* class for the chat below */
 
     /* Open theatre mode */
     var t = document.querySelector('[aria-label="Theatre Mode (alt+t)"]');
     if (t) t.click();
 
-    /* Change chatbox to below */
+    /* Change chatbox to below the stream */
     var chat = document.getElementsByClassName("right-column--theatre")[0];
     document.getElementsByClassName("persistent-player--theatre")[0].style = "top: 0px; left: 0px; position: fixed; z-index: 3000; height: 56.2vw; transform: scale(1); width: 100vw;";
     chat.className = chat.className.replace("right-column--beside", "right-column--below").replace(class_beside, class_below);
@@ -23,8 +31,10 @@ javascript: (() => {
     c.style["left"] = "0";
     c.style["bottom"] = "0";
 
-    document.getElementsByClassName("jaGgya")[0].parentNode.style = "display:none"; /* channel leaderboard */
-    document.getElementsByClassName("stream-chat-header")[0].style = "display:none !important"; /* 'stream chat' */
-    document.getElementsByClassName("right-column__toggle-visibility")[0].style = "display:none !important"; /* expand arrow */
-    document.getElementsByClassName('paid-pinned-chat-message-list')[0].style = "display:none !important"; /* paid chats */
+    /*  Hide individual elements */
+    hide("jaGgya", e => e[0].parentNode);  /* channel leaderboard */
+    hide("stream-chat-header", e => e[0]); /* 'stream chat' header */
+    hide("right-column__toggle-visibility", e => e[0]); /* expand arrow */
+    hide("paid-pinned-chat-message-list", e => e[0]); /* paid chats */
+    hide("Layout-sc-1xcs6mc-0 ivcMfs", e => e[0].parentElement.parentElement); /* more paid chats */
 })();
