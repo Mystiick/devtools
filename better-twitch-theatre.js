@@ -23,7 +23,8 @@ javascript: (() => {
     c.style["left"] = "0";
     c.style["bottom"] = "0";
 
-    /* Remove the top gifter/bits */
-    document.getElementsByClassName("channel-leaderboard-marquee")[0].style = "display:none";
-    document.getElementsByClassName("stream-chat-header")[0].style = "display:none !important";
+    document.getElementsByClassName("jaGgya")[0].parentNode.style = "display:none"; /* channel leaderboard */
+    document.getElementsByClassName("stream-chat-header")[0].style = "display:none !important"; /* 'stream chat' */
+    document.getElementsByClassName("right-column__toggle-visibility")[0].style = "display:none !important"; /* expand arrow */
+    document.getElementsByClassName('paid-pinned-chat-message-list')[0].style = "display:none !important"; /* paid chats */
 })();
