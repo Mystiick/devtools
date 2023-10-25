@@ -4,11 +4,11 @@ javascript: (() => {
         try {
             elementFinder(document.getElementsByClassName(className)).style = "display:none !important"
         }
-        catch { }
+        catch { console.log(`${className} not found`); }
     }
 
-    var class_beside = "fqTSIB"; /* class twitch assigns the chatbox for the right side */
-    var class_below = "dhPeII"; /* class for the chat below */
+    var class_beside = "eVTxSo"; /* class twitch assigns the chatbox for the right side */
+    var class_below = "hnyVuh"; /* class for the chat below */
 
     /* Open theatre mode */
     var t = document.querySelector('[aria-label="Theatre Mode (alt+t)"]');
@@ -32,7 +32,7 @@ javascript: (() => {
     c.style["bottom"] = "0";
 
     /*  Hide individual elements */
-    hide("jaGgya", e => e[0].parentNode);  /* channel leaderboard */
+    hide("Layout-sc-1xcs6mc-0 DGdsv", e => e[0].parentNode);  /* channel leaderboard */
     hide("stream-chat-header", e => e[0]); /* 'stream chat' header */
     hide("right-column__toggle-visibility", e => e[0]); /* expand arrow */
     hide("paid-pinned-chat-message-list", e => e[0]); /* paid chats */
